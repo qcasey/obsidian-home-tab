@@ -60,6 +60,13 @@
         display: flex;
         align-items: center;
         flex-direction: column;
+        padding-bottom: 30px;
+    }
+
+    @media(max-width: 700px){
+        .home-tab-searchbar-container{
+            padding-bottom: 50px;
+        }
     }
     
     .home-tab-searchbar{

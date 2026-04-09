@@ -11,6 +11,7 @@
     export let pluginSettings: HomeTabSettings
     export let contextualMenu: Menu
     export let customIcon: LucideIcon | undefined = undefined
+    export let listMode: boolean = false
 
     // Trim filename if too long
     // const filename = file.basename.length > 38 ? file.basename.slice(0,35) + '...' : file.basename
@@ -32,9 +33,9 @@
     }
 </script>
 
-<div class="home-tab-file-item" class:use-accent-color="{pluginSettings.selectionHighlight === 'accentColor'}"
+<div class="home-tab-file-item" class:use-accent-color="{pluginSettings.selectionHighlight === 'accentColor'}" class:list-mode={listMode}
     on:mousedown|preventDefault="{e => handleMouseClick(e, file)}">
-    
+
     <div class="home-tab-file-item-remove_btn" aria-label="File options"
         on:click={(e) => {
             contextualMenu.showAtMouseEvent(e)
@@ -43,30 +44,32 @@
         <MoreHorizontal strokeWidth={1} width={24} height={24} class='svg-icon lucide-x'/>
     </div>
 
-    <div class="home-tab-file-item-preview-icon">
-        {#if customIcon}
-            <svg xmlns="http://www.w3.org/2000/svg"  width="24" height="24" 
-                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="1" stroke-linecap="round" stroke-linejoin="round" 
-                        class="lucide-icon lucide lucide-{customIcon}">
-                            {@html getIcon(customIcon)?.innerHTML}
-            </svg>
-        {:else}
-            {#if fileType === 'markdown'}
-                <FileText strokeWidth={1}/>
-            {:else if fileType === 'image'}
-                <FileImage strokeWidth={1}/>
-            {:else if fileType === 'video'}
-                <FileVideo strokeWidth={1}/>
-            {:else if fileType === 'audio'}
-                <FileAudio strokeWidth={1}/>
-            {:else if fileType === 'pdf'}
-                <FilePieChart strokeWidth={1}/>
+    {#if !listMode}
+        <div class="home-tab-file-item-preview-icon">
+            {#if customIcon}
+                <svg xmlns="http://www.w3.org/2000/svg"  width="24" height="24"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+                            class="lucide-icon lucide lucide-{customIcon}">
+                                {@html getIcon(customIcon)?.innerHTML}
+                </svg>
             {:else}
-                <File strokeWidth={1}/>
+                {#if fileType === 'markdown'}
+                    <FileText strokeWidth={1}/>
+                {:else if fileType === 'image'}
+                    <FileImage strokeWidth={1}/>
+                {:else if fileType === 'video'}
+                    <FileVideo strokeWidth={1}/>
+                {:else if fileType === 'audio'}
+                    <FileAudio strokeWidth={1}/>
+                {:else if fileType === 'pdf'}
+                    <FilePieChart strokeWidth={1}/>
+                {:else}
+                    <File strokeWidth={1}/>
+                {/if}
             {/if}
-        {/if}
-    </div>
+        </div>
+    {/if}
     <div class="home-tab-file-item-name">
         {filename}
     </div>
@@ -120,5 +123,18 @@
 
     .home-tab-file-item-remove_btn:hover{
         opacity: 1;
+    }
+
+    .home-tab-file-item.list-mode{
+        min-width: unset;
+        max-width: unset;
+        width: 100%;
+        margin: 1px 0;
+        padding: 8px 0;
+    }
+
+    .home-tab-file-item.list-mode .home-tab-file-item-name{
+        text-align: left;
+        -webkit-line-clamp: 1;
     }
 </style>

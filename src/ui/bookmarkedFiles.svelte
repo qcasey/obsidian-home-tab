@@ -30,24 +30,23 @@
 </script>
 
 <div class="home-tab-bookmarked-files-container">
+    <div class="home-tab-bookmarked-files-title">Bookmarks</div>
     {#each bookmarkedFiles as item (item.file.path)}
-        <FileDisplayItem file={item.file} customIcon={item.iconId} {app} {pluginSettings} {contextualMenu}
+        <FileDisplayItem file={item.file} customIcon={item.iconId} {app} {pluginSettings} {contextualMenu} listMode={true}
         on:itemMenu={(e) => selectedFile = e.detail.file}/>
     {/each}
 </div>
 
 <style>
     .home-tab-bookmarked-files-container{
+        flex: 1;
         display: flex;
-        align-items: baseline;
-        justify-content: center;
-        flex-wrap: wrap;
-        
-        width: 65%;
-        /* min-width: 150px; */
-        max-width: 900px;
-        
-        padding-top: 30px;
-        margin: auto;
+        flex-direction: column;
+        min-width: 0;
+    }
+    .home-tab-bookmarked-files-title{
+        font-weight: 600;
+        font-size: var(--font-ui-large);
+        padding-bottom: 5px;
     }
 </style>

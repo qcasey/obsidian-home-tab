@@ -157,13 +157,15 @@
     
     <SearchBar {HomeTabSearchBar} embedded={embeddedView ? true : false}/>
 
-    {#if isbookmarkedPluginEnabled && bookmarkedFileList && renderbookmarkedFiles}
-        <BookmarkedFiles bookmarkedFiles={bookmarkedFileList} {view} {pluginSettings} bookmarkedFileManager={plugin.bookmarkedFileManager}/>
-    {/if}
+    <div class="home-tab-files-row">
+        {#if plugin.recentFileManager && recentFileList.length > 0  && renderRecentFiles}
+            <RecentFiles {recentFileList} {view} {pluginSettings} recentFileManager={plugin.recentFileManager}/>
+        {/if}
 
-    {#if plugin.recentFileManager && recentFileList.length > 0  && renderRecentFiles}
-        <RecentFiles {recentFileList} {view} {pluginSettings} recentFileManager={plugin.recentFileManager}/>
-    {/if}
+        {#if isbookmarkedPluginEnabled && bookmarkedFileList && renderbookmarkedFiles}
+            <BookmarkedFiles bookmarkedFiles={bookmarkedFileList} {view} {pluginSettings} bookmarkedFileManager={plugin.bookmarkedFileManager}/>
+        {/if}
+    </div>
 </main>
   
 <style>
@@ -197,6 +199,25 @@
     @media(max-height: 1000px){
         .home-tab:not(.embedded) .home-tab-wordmark-container{
             padding-top: 10px;
+        }
+    }
+
+    .home-tab-files-row{
+        display: flex;
+        flex-direction: row;
+        gap: 40px;
+        width: 50%;
+        max-width: 700px;
+        min-width: 300px;
+        margin: 0 auto;
+    }
+
+    @media(max-width: 700px){
+        .home-tab-files-row{
+            flex-direction: column;
+            width: 90%;
+            max-width: unset;
+            gap: 0;
         }
     }
 </style>

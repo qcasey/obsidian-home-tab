@@ -26,7 +26,7 @@
     </div>
     <div class="home-tab-recent-files-wrapper">
         {#each recentFileList as recentFile (recentFile.file.path)}
-            <FileDisplayItem file={recentFile.file} {app} {pluginSettings} {contextualMenu}
+            <FileDisplayItem file={recentFile.file} {app} {pluginSettings} {contextualMenu} listMode={true}
             on:itemMenu={(e) => selectedFile = e.detail.file}/>
         {/each}
     </div>
@@ -34,32 +34,24 @@
 
 <style>
     .home-tab-recent-files-container{
-        width: 65%;
+        flex: 1;
         display: flex;
         flex-direction: column;
-
-        padding-top: 20px;
-        margin: auto;
+        min-width: 0;
     }
     .home-tab-recent-files-title{
-        text-align: center;
         font-weight: 600;
         font-size: var(--font-ui-large);
         padding-bottom: 5px;
     }
     .home-tab-recent-files-wrapper{
         display: flex;
-        /* min-width: 250px; */
-        max-width: 900px;
-        align-items: center;
-        justify-content: center;
-        flex-wrap: wrap;
-        margin: auto;
+        flex-direction: column;
     }
 
-    @media(max-width: 600px){
+    @media(max-width: 700px){
         .home-tab-recent-files-container{
-            padding-bottom: 75px;
+            padding-bottom: 20px;
         }
     }
 </style>
