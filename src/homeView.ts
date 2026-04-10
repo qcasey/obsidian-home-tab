@@ -33,13 +33,10 @@ export class EmbeddedHomeTab extends MarkdownRenderChild{
                 embeddedView: this
             }
         })
-
-        this.searchBar.load()
     }
 
     onunload(): void {
         this.plugin.activeEmbeddedHomeTabViews.splice(this.plugin.activeEmbeddedHomeTabViews.findIndex(item => item.view == this.view),1)
-        this.searchBar.fileSuggester.close()
         this.homepage.$destroy()
     }
 
@@ -84,7 +81,7 @@ export class HomeTabView extends FileView{
     getViewType() {
         return VIEW_TYPE;
     }
-    
+
     getDisplayText(): string {
         return 'Home tab'
     }
@@ -98,15 +95,10 @@ export class HomeTabView extends FileView{
                 HomeTabSearchBar: this.searchBar
             }
         });
-        this.searchBar.load()
-        this.searchBar.focusSearchbar()
-
-        // this.fileSuggester = new HomeTabFileSuggester(this.app, this.plugin, this,
-            // get(this.searchBarEl), get(this.suggestionContainerEl))
+        this.searchBar.openQuickSwitcher()
     }
 
     async onClose(): Promise<void>{
-        this.searchBar.fileSuggester.destroy()  // 使用 destroy() 而不是 close()
         this.homepage.$destroy();
     }
-} 
+}

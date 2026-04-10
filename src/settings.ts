@@ -37,71 +37,41 @@ export interface HomeTabSettings extends ObjectKeys{
     fontColor?: string
     fontColorType: ColorChoices
     fontWeight: number
-    maxResults: number
     showbookmarkedFiles: boolean
     showRecentFiles: boolean
     maxRecentFiles: number
     storeRecentFile: boolean
-    showPath: boolean
     selectionHighlight: ColorChoices
-    showShortcuts: boolean
-    markdownOnly: boolean
-    additionalExtensions: string // 新增：额外搜索的文件后缀名，英文逗号分隔
-    unresolvedLinks: boolean
-    searchTitle: boolean
-    searchHeadings: boolean // 是否启用标题（heading）搜索
-    autoJumpToHeading?: boolean // 新增：标题匹配时自动跳转到 heading
-    headingJumpStrategy?: 'never' | 'always' | 'smart' // 新增：标题跳转策略
     recentFilesStore: recentFileStore[]
     bookmarkedFileStore: bookmarkedFileStore[]
-    searchDelay: number
     replaceNewTabs: boolean
     newTabOnStart: boolean
     closePreviousSessionTabs: boolean
-    omnisearch: boolean
-    showOmnisearchExcerpt: boolean
-    debugMode?: boolean // 新增：调试模式，显示搜索和匹配的详细信息
-    hideOnBlur?: boolean // 新增：失去焦点时是否隐藏搜索结果
 }
 
 export const DEFAULT_SETTINGS: HomeTabSettings = {
     logoType: 'default',
     logo: {
-        lucideIcon: '', 
-        imagePath: '', 
+        lucideIcon: '',
+        imagePath: '',
         imageLink: '',},
     logoScale: 1.2,
     iconColorType: 'default',
     wordmark: 'Obsidian',
     customFont: 'interfaceFont',
     fontSize: '4em',
-    fontColorType: 'default', 
+    fontColorType: 'default',
     fontWeight: 600,
-    maxResults: 5,
     showbookmarkedFiles: app.internalPlugins.getPluginById('bookmarks') ? true : false,
     showRecentFiles: true,
     maxRecentFiles: 12,
     storeRecentFile: true,
-    showPath: true,
     selectionHighlight: 'default',
-    showShortcuts: true,
-    markdownOnly: false,
-    additionalExtensions: '', // 新增：额外搜索的文件后缀名，默认为空
-    unresolvedLinks: false,
-    searchTitle: false,
-    searchHeadings: true,
-    autoJumpToHeading: true, // 新增：标题匹配时自动跳转到 heading，默认开启
-    headingJumpStrategy: 'smart', // 新增：默认使用智能跳转策略
     recentFilesStore: [],
     bookmarkedFileStore: [],
-    searchDelay: 0,
     replaceNewTabs: true,
     newTabOnStart: false,
     closePreviousSessionTabs: false,
-    omnisearch: false,
-    showOmnisearchExcerpt: true,
-    debugMode: false, // 新增：默认关闭调试模式
-    hideOnBlur: true, // 新增：默认情况下失去焦点时隐藏搜索结果
 }
 
 
@@ -140,138 +110,6 @@ export class HomeTabSettingTab extends PluginSettingTab{
                 .addToggle(toggle => toggle
                     .setValue(this.plugin.settings.closePreviousSessionTabs)
                     .onChange(value => {this.plugin.settings.closePreviousSessionTabs = value; this.plugin.saveSettings()}))
-        }
-
-		containerEl.createEl('h2', {text: 'Search settings'});
-        if(this.plugin.app.plugins.getPlugin('omnisearch')){
-            new Setting(containerEl)
-                .setName('Use Omnisearch')
-                .setDesc('Set Omnisearch as the default search engine.')
-                .addToggle(toggle => toggle
-                    .setValue(this.plugin.settings.omnisearch)
-                    .onChange(value => {this.plugin.settings.omnisearch = value; this.plugin.saveSettings(); this.display(); this.plugin.refreshOpenViews()}))
-        }
-        if(!this.plugin.settings.omnisearch){
-            new Setting(containerEl)
-                .setName('Search only markdown files')
-                .addToggle(toggle => toggle
-                    .setValue(this.plugin.settings.markdownOnly)
-                    .onChange(value => {this.plugin.settings.markdownOnly = value; this.plugin.saveSettings(); this.plugin.refreshOpenViews(); this.display()}))
-            
-            // 仅在启用 markdownOnly 时显示额外搜索后缀名设置
-            if(this.plugin.settings.markdownOnly){
-                new Setting(containerEl)
-                    .setName('Additional extensions to search')
-                    .setDesc('Comma-separated list of file extensions to search (without the dot). Example: form, base')
-                    .addText(text => text
-                        .setValue(this.plugin.settings.additionalExtensions)
-                        .onChange(value => {this.plugin.settings.additionalExtensions = value; this.plugin.saveSettings(); this.plugin.refreshOpenViews()}))
-            }
-    
-            new Setting(containerEl)
-                .setName('Show uncreated files')
-                .addToggle(toggle => toggle
-                    .setValue(this.plugin.settings.unresolvedLinks)
-                    .onChange(value => {this.plugin.settings.unresolvedLinks = value; this.plugin.saveSettings(); this.plugin.refreshOpenViews()}))
-            
-            new Setting(containerEl)
-                .setName('Search file titles')
-                .setDesc('Enable this to search through file titles.')
-                .addToggle(toggle => toggle
-                    .setValue(this.plugin.settings.searchTitle)
-                    .onChange(value => {this.plugin.settings.searchTitle = value; this.plugin.saveSettings(); this.plugin.refreshOpenViews()}))
-            
-            new Setting(containerEl)
-                .setName('Search headings')
-                .setDesc('Enable this to search through document headings (# Title).')
-                .addToggle(toggle => toggle
-                    .setValue(this.plugin.settings.searchHeadings)
-                    .onChange(value => {this.plugin.settings.searchHeadings = value; this.plugin.saveSettings(); this.plugin.refreshOpenViews(); this.display();}))
-            // 仅在启用 Search Headings 时显示“标题匹配时自动跳转到 heading”
-            if(this.plugin.settings.searchHeadings){
-                new Setting(containerEl)
-                    .setName('Jump to Heading')
-                    .setDesc('When search results match headings, clicking will automatically jump to the corresponding heading.')
-                    .addToggle(toggle => toggle
-                        .setValue(this.plugin.settings.autoJumpToHeading ?? true)
-                        .onChange(value => {this.plugin.settings.autoJumpToHeading = value; this.plugin.saveSettings(); this.display();}))
-
-                if(this.plugin.settings.autoJumpToHeading){
-                    new Setting(containerEl)
-                        .setName('Heading Jump Strategy')
-                        .setDesc('Smart: Only jump when heading match is more relevant than file name. Always: Jump whenever a heading matches. Never: Never jump to headings.')
-                        .addDropdown(dropdown => dropdown
-                            .addOption('smart', 'Smart (Recommended)')
-                            .addOption('always', 'Always Jump')
-                            .addOption('never', 'Never Jump')
-                            .setValue(this.plugin.settings.headingJumpStrategy ?? 'smart')
-                            .onChange(value => {this.plugin.settings.headingJumpStrategy = value as 'never' | 'always' | 'smart'; this.plugin.saveSettings();}))
-                }
-            }
-            
-            new Setting(containerEl)
-                .setName('Show file path')
-                .setDesc('Displays file path at the right of the filename.')
-                .addToggle((toggle) => toggle
-                    .setValue(this.plugin.settings.showPath)
-                    .onChange((value) => {this.plugin.settings.showPath = value; this.plugin.saveSettings()}))
-        }
-
-        new Setting(containerEl)
-            .setName('Show shorcuts')
-            .setDesc('Displays shortcuts under the search results.')
-            .addToggle((toggle) => toggle
-                .setValue(this.plugin.settings.showShortcuts)
-                .onChange((value) => {
-                    this.plugin.settings.showShortcuts = value
-                    this.plugin.refreshOpenViews()
-                    this.plugin.saveSettings()
-                }
-            ))
-
-        new Setting(containerEl)
-            .setName('Search results')
-            .setDesc('Set how many results display.')
-            .addSlider((slider) => slider
-                .setLimits(1, 25, 1)
-                .setValue(this.plugin.settings.maxResults)
-                .setDynamicTooltip()
-                .onChange((value) => {this.plugin.settings.maxResults = value; this.plugin.saveSettings()}))
-            .then((settingEl) => this.addResetButton(settingEl, 'maxResults'))
-
-        new Setting(containerEl)
-            .setName('Search delay')
-            .setDesc('The value is in milliseconds.')
-            .addSlider((slider) => slider
-                .setLimits(0, 500, 10)
-                .setValue(this.plugin.settings.searchDelay)
-                .setDynamicTooltip()
-                .onChange((value) => {this.plugin.settings.searchDelay = value; this.plugin.saveSettings(); this.plugin.refreshOpenViews()}))
-            .then((settingEl) => this.addResetButton(settingEl, 'searchDelay'))
-
-        new Setting(containerEl)
-            .setName('Hide on blur')
-            .setDesc('Hide search results when the search input loses focus.')
-            .addToggle((toggle) => toggle
-                .setValue(this.plugin.settings.hideOnBlur ?? true)
-                .onChange((value) => {
-                    this.plugin.settings.hideOnBlur = value
-                    this.plugin.saveSettings()
-                    this.plugin.refreshOpenViews()
-                })
-            )
-
-        if(this.plugin.app.plugins.getPlugin('omnisearch')){
-            new Setting(containerEl)
-                .setName('Show excerpt (Omnisearch)')
-                .setDesc('Shows the contextual part of the note that matches the search.')
-                .addToggle((toggle) => toggle
-                    .setValue(this.plugin.settings.showOmnisearchExcerpt)
-                    .onChange((value) => {
-                        this.plugin.settings.showOmnisearchExcerpt = value
-                        this.plugin.saveSettings()
-                    }
-                ))
         }
 
         containerEl.createEl('h2', {text: 'Files display'});
@@ -583,18 +421,6 @@ export class HomeTabSettingTab extends PluginSettingTab{
             .onChange((value: ColorChoices) => {this.plugin.settings.selectionHighlight = value; this.plugin.saveSettings(); this.plugin.refreshOpenViews()}))
         .then((settingEl) => this.addResetButton(settingEl, 'selectionHighlight'))
 
-        containerEl.createEl('h2', {text: 'Developer'});
-        
-        new Setting(containerEl)
-            .setName('Debug Mode')
-            .setDesc('Enable debug logging for search results and match analysis. Check the developer console for detailed information.')
-            .addToggle((toggle) => toggle
-                .setValue(this.plugin.settings.debugMode ?? false)
-                .onChange((value) => {
-                    this.plugin.settings.debugMode = value
-                    this.plugin.saveSettings()
-                })
-            )
     }
 
     addResetButton(settingElement: Setting, settingKey: string, refreshView: boolean = true){

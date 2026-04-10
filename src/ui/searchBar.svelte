@@ -1,57 +1,28 @@
 <script lang="ts">
-	import { Platform } from "obsidian";
-	import { filterKeys, type FilterKey, type SearchBarFilterType } from "src/homeTabSearchbar";
+    import { Platform } from "obsidian";
     import type HomeTabSearchBar from "src/homeTabSearchbar";
-    import { onMount } from 'svelte';
-    
+
     export let HomeTabSearchBar: HomeTabSearchBar
     export let embedded: boolean = false
-    const searchBarEl = HomeTabSearchBar.searchBarEl
-    const activeExtEl = HomeTabSearchBar.activeExtEl
-    const container = HomeTabSearchBar.suggestionContainerEl
     // @ts-ignore
     const isPhone = Platform.isPhone
 
-    let inputValue = ''
-    let inputEl: HTMLInputElement;
-
-    onMount(() => {
-        if (inputEl) {
-            HomeTabSearchBar.setSearchBarEl(inputEl);
-        }
-    });
-
-    function handleKeydown(e: KeyboardEvent): void{
-        // If the input field is empty and a filter is active remove it
-        if(e.key === 'Backspace'){
-            if(inputValue != '') return
-            if(HomeTabSearchBar.activeFilter){
-                HomeTabSearchBar.updateActiveSuggester('default')
-                // this.fileSuggester = new HomeTabFileSuggester(this.plugin.app, this.plugin, this.view, this)
-                // this.fuzzySearch.updateSearchArray(this.files)
-                // this.activeFilterEl.toggleClass('hide', true)
-            }
-        }
-
-        if(e.key === 'Tab'){
-            e.preventDefault()
-            const key = inputValue.toLowerCase()
-            // Activate search filter with tab
-            if(filterKeys.find(item => item === key)){
-                HomeTabSearchBar.updateActiveSuggester(key as FilterKey)
-            }
-        }
+    function handleClick(): void {
+        HomeTabSearchBar.openQuickSwitcher();
     }
 
+    function handleFocus(): void {
+        HomeTabSearchBar.openQuickSwitcher();
+    }
 </script>
 
-<div class="home-tab-searchbar-container" bind:this={$container}>
+<div class="home-tab-searchbar-container">
     <div class="home-tab-searchbar"
         class:embedded={embedded}
         style:width={embedded || isPhone ? "90%" : "50%"}>
-        <div class='nav-file-tag home-tab-suggestion-file-tag hide' bind:this={$activeExtEl}></div>
-        <input type="search" spellcheck="false" placeholder="Type to start search..." bind:value={inputValue} bind:this={inputEl}
-        on:keydown={(e) => handleKeydown(e)}>
+        <input type="search" spellcheck="false" placeholder="Type to start search..." readonly
+        on:click={handleClick}
+        on:focus={handleFocus}>
     </div>
 </div>
 
@@ -68,10 +39,9 @@
             padding-bottom: 50px;
         }
     }
-    
+
     .home-tab-searchbar{
         display: flex;
-        /* width: 50%; */
         min-width: 250px;
         max-width: 700px;
         margin: 0 auto;
@@ -83,6 +53,7 @@
         padding: var(--size-2-3);
         border-radius: var(--input-radius);
         outline: none;
+        cursor: pointer;
     }
 
     .home-tab-searchbar input{
@@ -93,13 +64,10 @@
         background: none;
         border: none;
         padding-left: 12px;
+        cursor: pointer;
     }
     .home-tab-searchbar input:hover{
         background: none;
         border: none;
-    }
-
-    .home-tab-suggestion-file-tag.hide{
-        display: none;
     }
 </style>
