@@ -1,22 +1,29 @@
 <script lang="ts">
-	import { Menu, View, type TFile } from "obsidian";
-	import type { RecentFileManager, recentFile } from "src/recentFiles";
+	import { Menu, View, TFile, TAbstractFile } from "obsidian";
 	import type { HomeTabSettings } from "src/settings";
 	import FileDisplayItem from "./svelteComponents/fileDisplayItem.svelte";
 
     export let view: View
-    export let recentFileList: recentFile[]
     export let pluginSettings: HomeTabSettings
-    export let recentFileManager: RecentFileManager
     const app = view.leaf.app
 
     let selectedFile: TFile
 
+    function getRecentFiles(): TFile[] {
+        const paths = app.workspace.getLastOpenFiles()
+        const files: TFile[] = []
+        for (const path of paths) {
+            const file = app.vault.getAbstractFileByPath(path)
+            if (file instanceof TFile) {
+                files.push(file)
+            }
+        }
+        return files
+    }
+
+    let recentFileList = getRecentFiles()
+
     let contextualMenu: Menu = new Menu()
-            .addItem((item) => item
-                .setTitle('Hide file')
-                .setIcon('eye-off')
-                .onClick(() => recentFileManager.removeRecentFile(selectedFile)))
             .setUseNativeMenu(app.vault.config.nativeMenus)
 </script>
 
@@ -25,8 +32,8 @@
         Recent files
     </div>
     <div class="home-tab-recent-files-wrapper">
-        {#each recentFileList as recentFile (recentFile.file.path)}
-            <FileDisplayItem file={recentFile.file} {app} {pluginSettings} {contextualMenu} listMode={true}
+        {#each recentFileList as file (file.path)}
+            <FileDisplayItem {file} {app} {pluginSettings} {contextualMenu} listMode={true}
             on:itemMenu={(e) => selectedFile = e.detail.file}/>
         {/each}
     </div>

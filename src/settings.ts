@@ -6,7 +6,6 @@ import ImageFileSuggester from './suggester/imageSuggester'
 import cssUnitValidator from './utils/cssUnitValidator'
 import isLink from './utils/isLink'
 import fontSuggester from './suggester/fontSuggester'
-import type { recentFileStore } from './recentFiles'
 import type { bookmarkedFileStore } from './bookmarkedFiles'
 import { checkFont } from './utils/fontValidator'
 
@@ -39,10 +38,7 @@ export interface HomeTabSettings extends ObjectKeys{
     fontWeight: number
     showbookmarkedFiles: boolean
     showRecentFiles: boolean
-    maxRecentFiles: number
-    storeRecentFile: boolean
     selectionHighlight: ColorChoices
-    recentFilesStore: recentFileStore[]
     bookmarkedFileStore: bookmarkedFileStore[]
     replaceNewTabs: boolean
     newTabOnStart: boolean
@@ -64,10 +60,7 @@ export const DEFAULT_SETTINGS: HomeTabSettings = {
     fontWeight: 600,
     showbookmarkedFiles: app.internalPlugins.getPluginById('bookmarks') ? true : false,
     showRecentFiles: true,
-    maxRecentFiles: 12,
-    storeRecentFile: true,
     selectionHighlight: 'default',
-    recentFilesStore: [],
     bookmarkedFileStore: [],
     replaceNewTabs: true,
     newTabOnStart: false,
@@ -133,31 +126,7 @@ export class HomeTabSettingTab extends PluginSettingTab{
             .setDesc('Displays recent files under the search bar.')
             .addToggle((toggle) => toggle
                 .setValue(this.plugin.settings.showRecentFiles)
-                .onChange((value) => {this.plugin.settings.showRecentFiles = value; this.plugin.saveSettings(); this.display(); this.plugin.refreshOpenViews()
-                    // if(value && !this.plugin.recentFileManager){
-                    //     this.plugin.recentFileManager = new RecentFileManager(this.app, this.plugin)
-                    // }
-                    // value ? this.plugin.recentFileManager.load() : this.plugin.recentFileManager.unload() // Detach recentFileManager instance
-                }))
-
-        if(this.plugin.settings.showRecentFiles){
-            new Setting(containerEl)
-            .setName('Store last recent files')
-            .setDesc('Remembers the recent files of the previous session.')
-            .addToggle((toggle) => toggle
-                .setValue(this.plugin.settings.storeRecentFile)
-                .onChange((value) => {this.plugin.settings.storeRecentFile = value; this.plugin.saveSettings()}))
-
-            new Setting(containerEl)
-                .setName('Recent files')
-                .setDesc('Set how many recent files display.')
-                .addSlider((slider) => slider
-                    .setValue(this.plugin.settings.maxRecentFiles)
-                    .setLimits(1, 25, 1)
-                    .setDynamicTooltip()
-                    .onChange((value) => {this.plugin.recentFileManager.onNewMaxListLenght(value); this.plugin.settings.maxRecentFiles = value; this.plugin.saveSettings()}))
-                .then((settingEl) => this.addResetButton(settingEl, 'maxRecentFiles'))
-        }
+                .onChange((value) => {this.plugin.settings.showRecentFiles = value; this.plugin.saveSettings(); this.plugin.refreshOpenViews()}))
 
         containerEl.createEl('h2', {text: 'Appearance'});
 

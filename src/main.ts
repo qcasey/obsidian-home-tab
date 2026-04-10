@@ -12,7 +12,6 @@ import {
 import { EmbeddedHomeTab, HomeTabView, VIEW_TYPE } from 'src/homeView';
 import { HomeTabSettingTab, DEFAULT_SETTINGS, type HomeTabSettings } from './settings'
 import { pluginSettingsStore, bookmarkedFiles } from './store'
-import { RecentFileManager } from './recentFiles';
 import { bookmarkedFilesManager } from './bookmarkedFiles';
 
 declare module 'obsidian'{
@@ -68,7 +67,6 @@ declare module 'obsidian'{
 
 export default class HomeTab extends Plugin {
 	settings: HomeTabSettings;
-	recentFileManager: RecentFileManager
 	bookmarkedFileManager: bookmarkedFilesManager
 	activeEmbeddedHomeTabViews: EmbeddedHomeTab[]
 	
@@ -87,9 +85,6 @@ export default class HomeTab extends Plugin {
 		pluginSettingsStore.set(this.settings) // Store the settings for the svelte components
 
 		this.activeEmbeddedHomeTabViews = []
-
-		this.recentFileManager = new RecentFileManager(this.app, this)
-		this.recentFileManager.load()
 
 		this.addCommand({
 			id: 'open-new-home-tab',
@@ -149,7 +144,6 @@ export default class HomeTab extends Plugin {
 	onunload(): void {
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE)
 		this.activeEmbeddedHomeTabViews.forEach(view => view.unload())
-		this.recentFileManager.unload()
 		this.bookmarkedFileManager.unload()
 	}
 

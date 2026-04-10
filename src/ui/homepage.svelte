@@ -1,40 +1,33 @@
 <script lang="ts">
     import SearchBar from './searchBar.svelte';
     import type { HomeTabSettings } from 'src/settings';
-    import { pluginSettingsStore, recentFiles, bookmarkedFiles } from '../store'
+    import { pluginSettingsStore, bookmarkedFiles } from '../store'
     import { getIcon, View } from 'obsidian'
     import type { EmbeddedHomeTab } from '../homeView';
     import type HomeTabSearchBar from 'src/homeTabSearchbar';
-	import type { recentFile } from 'src/recentFiles';
 	import BookmarkedFiles from './bookmarkedFiles.svelte';
 	import RecentFiles from './recentFiles.svelte';
 	import type { bookmarkedFile } from 'src/bookmarkedFiles';
 	import type HomeTab from 'src/main';
-    
+
     export let view: View
     export let HomeTabSearchBar: HomeTabSearchBar
     export let plugin: HomeTab
     export let embeddedView: EmbeddedHomeTab | undefined = undefined
 
-    // let viewType: 'embed' | 'standalone' = view instanceof HomeTabView ? 'standalone' : 'embed'
     let bookmarkedFileList: bookmarkedFile[] = []
     let pluginSettings: HomeTabSettings
-    let recentFileList: recentFile[] = []
-    
+
     pluginSettingsStore.subscribe((settings) => {
         pluginSettings = settings
-    
+
         if(pluginSettings.showbookmarkedFiles){
             bookmarkedFiles.subscribe((files) => bookmarkedFileList = files)
-        }
-        if(pluginSettings.showRecentFiles){
-            recentFiles.subscribe((files) => recentFileList = files)
         }
     })
 
     const vaultAdapter = app.vault.adapter
     const gradientUniqueId = Math.floor(Math.random()*10e6)
-    // const gradientUniqueId = view.leaf.activeTime
     const isbookmarkedPluginEnabled = app.internalPlugins.getPluginById('bookmarks') ? true : false
 
     // @ts-ignore
@@ -158,8 +151,8 @@
     <SearchBar {HomeTabSearchBar} embedded={embeddedView ? true : false}/>
 
     <div class="home-tab-files-row">
-        {#if plugin.recentFileManager && recentFileList.length > 0  && renderRecentFiles}
-            <RecentFiles {recentFileList} {view} {pluginSettings} recentFileManager={plugin.recentFileManager}/>
+        {#if renderRecentFiles}
+            <RecentFiles {view} {pluginSettings}/>
         {/if}
 
         {#if isbookmarkedPluginEnabled && bookmarkedFileList && renderbookmarkedFiles}
