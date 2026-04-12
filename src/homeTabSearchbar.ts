@@ -28,6 +28,12 @@ export default class HomeTabSearchBar{
             return;
         }
         this.lastOpenedTime = now;
+
+        // Prefer Quick Switcher++ if available
+        const switcherPlusId = 'darlal-switcher-plus:switcher-plus:open';
+        if (this.app.commands.executeCommandById(switcherPlusId)) {
+            return;
+        }
         this.app.commands.executeCommandById('switcher:open');
     }
 }
