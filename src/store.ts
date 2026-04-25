@@ -4,3 +4,4 @@ import type { bookmarkedFile } from './bookmarkedFiles'
 
 export const pluginSettingsStore = writable<HomeTabSettings>()
 export const bookmarkedFiles = writable<bookmarkedFile[]>()
+export const tabsOverviewOpen = writable<boolean>(false)

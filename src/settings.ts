@@ -43,6 +43,8 @@ export interface HomeTabSettings extends ObjectKeys{
     replaceNewTabs: boolean
     newTabOnStart: boolean
     closePreviousSessionTabs: boolean
+    enableTabsOverview: boolean
+    swipeGestureEnabled: boolean
 }
 
 export const DEFAULT_SETTINGS: HomeTabSettings = {
@@ -65,6 +67,8 @@ export const DEFAULT_SETTINGS: HomeTabSettings = {
     replaceNewTabs: true,
     newTabOnStart: false,
     closePreviousSessionTabs: false,
+    enableTabsOverview: false,
+    swipeGestureEnabled: true,
 }
 
 
@@ -103,6 +107,34 @@ export class HomeTabSettingTab extends PluginSettingTab{
                 .addToggle(toggle => toggle
                     .setValue(this.plugin.settings.closePreviousSessionTabs)
                     .onChange(value => {this.plugin.settings.closePreviousSessionTabs = value; this.plugin.saveSettings()}))
+        }
+
+        if(Platform.isMobile){
+            containerEl.createEl('h2', {text: 'Mobile tabs overview'});
+            new Setting(containerEl)
+                .setName('Enable tabs overview')
+                .setDesc('Adds a Safari-like tabs overview with swipe-up gesture and zoom animation.')
+                .addToggle(toggle => toggle
+                    .setValue(this.plugin.settings.enableTabsOverview)
+                    .onChange(value => {
+                        this.plugin.settings.enableTabsOverview = value
+                        this.plugin.saveSettings()
+                        this.plugin.toggleTabsOverview(value)
+                        this.display()
+                    }))
+
+            if(this.plugin.settings.enableTabsOverview){
+                new Setting(containerEl)
+                    .setName('Swipe-up gesture')
+                    .setDesc('Swipe up from the bottom of the screen to open the tabs overview.')
+                    .addToggle(toggle => toggle
+                        .setValue(this.plugin.settings.swipeGestureEnabled)
+                        .onChange(value => {
+                            this.plugin.settings.swipeGestureEnabled = value
+                            this.plugin.saveSettings()
+                            this.plugin.toggleSwipeGesture(value)
+                        }))
+            }
         }
 
         containerEl.createEl('h2', {text: 'Files display'});

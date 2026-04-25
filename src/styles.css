@@ -99,3 +99,150 @@
 .setting-item-info.ultra-compressed{
     width: 20%;
 }
+
+/* Tabs overview */
+.tab-overview-swipe-zone{
+    position: fixed;
+    bottom: 48px;
+    left: 0;
+    right: 0;
+    height: 60px;
+    z-index: 100;
+    touch-action: none;
+}
+
+.tab-overview-container{
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: none;
+    flex-direction: column;
+}
+
+.tab-overview-backdrop{
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 48px 12px 12px;
+    background: var(--background-primary);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.tab-overview-grid{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    width: 100%;
+    max-width: 600px;
+}
+
+.tab-card{
+    display: flex;
+    flex-direction: column;
+    background: var(--background-secondary);
+    border-radius: 10px;
+    border: 1px solid var(--background-modifier-border);
+    overflow: hidden;
+    aspect-ratio: 3 / 4;
+    cursor: pointer;
+    transition: box-shadow 150ms ease;
+}
+
+.tab-card--active{
+    border-color: var(--interactive-accent);
+    box-shadow: 0 0 0 2px var(--interactive-accent);
+}
+
+.tab-card-header{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 8px 6px;
+    border-bottom: 1px solid var(--background-modifier-border);
+    min-height: 32px;
+}
+
+.tab-card-icon{
+    flex-shrink: 0;
+    color: var(--text-muted);
+}
+
+.tab-card-icon svg{
+    width: 14px;
+    height: 14px;
+}
+
+.tab-card-title{
+    flex: 1;
+    font-size: var(--font-ui-small);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tab-card-close{
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    padding: 2px;
+    border-radius: 4px;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.tab-card-close:hover{
+    background: var(--background-modifier-hover);
+}
+
+.tab-card-close-icon svg{
+    width: 12px;
+    height: 12px;
+}
+
+.tab-card-body{
+    flex: 1;
+    padding: 8px;
+    overflow: hidden;
+}
+
+.tab-card-snippet{
+    font-size: var(--font-ui-smaller);
+    color: var(--text-muted);
+    line-height: 1.4;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.tab-card-empty-icon{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-faint);
+    opacity: 0.3;
+}
+
+.tab-card-empty-icon svg{
+    width: 40px;
+    height: 40px;
+}
+
+.tab-card-footer{
+    padding: 4px 8px 6px;
+    border-top: 1px solid var(--background-modifier-border);
+}
+
+.tab-card-path{
+    font-size: 10px;
+    color: var(--text-faint);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}

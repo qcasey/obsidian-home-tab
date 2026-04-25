@@ -1,18 +1,22 @@
-import { 
-	App, 
-	Plugin, 
-	WorkspaceLeaf, 
-	WorkspaceMobileDrawer, 
-	WorkspaceSplit, 
+import {
+	App,
+	Notice,
+	Platform,
+	Plugin,
+	WorkspaceLeaf,
+	WorkspaceMobileDrawer,
+	WorkspaceSplit,
 	WorkspaceTabs,
-	ItemView, 
+	ItemView,
 	ViewStateResult,
-	MarkdownView 
+	MarkdownView
 } from 'obsidian';
 import { EmbeddedHomeTab, HomeTabView, VIEW_TYPE } from 'src/homeView';
 import { HomeTabSettingTab, DEFAULT_SETTINGS, type HomeTabSettings } from './settings'
 import { pluginSettingsStore, bookmarkedFiles } from './store'
 import { bookmarkedFilesManager } from './bookmarkedFiles';
+import { SwipeDetector } from './gestures/swipeDetector';
+import { TabsOverviewManager } from './tabsOverviewManager';
 
 declare module 'obsidian'{
 	interface App{
@@ -69,6 +73,8 @@ export default class HomeTab extends Plugin {
 	settings: HomeTabSettings;
 	bookmarkedFileManager: bookmarkedFilesManager
 	activeEmbeddedHomeTabViews: EmbeddedHomeTab[]
+	private swipeDetector: SwipeDetector | null = null
+	private tabsOverviewManager: TabsOverviewManager | null = null
 	
 	async onload() {
 		console.log('Loading home-tab plugin')
@@ -95,6 +101,20 @@ export default class HomeTab extends Plugin {
 			name: 'Replace current tab',
 			callback: () => this.activateView(true)})
 
+		if(Platform.isMobile){
+			this.addCommand({
+				id: 'open-tabs-overview',
+				name: 'Open tabs overview',
+				callback: () => {
+					if(this.settings.enableTabsOverview && this.tabsOverviewManager){
+						this.tabsOverviewManager.toggle()
+					} else {
+						new Notice('Enable "Tabs overview" in Home tab settings first.')
+					}
+				}
+			})
+		}
+
 		// Wait for all plugins to load before check if the bookmarked plugin is enabled
 		this.app.workspace.onLayoutReady(() => {
 			if(this.app.internalPlugins.getPluginById('bookmarks')){
@@ -110,6 +130,11 @@ export default class HomeTab extends Plugin {
 					ctx.addChild(embeddedHomeTab)
 				}
 			})
+
+			// Initialize tabs overview on mobile if enabled
+			if(Platform.isMobile && this.settings.enableTabsOverview){
+				this.initTabsOverview()
+			}
 
 			if(this.settings.newTabOnStart){
 				// If an Home tab leaf is already open focus it
@@ -145,6 +170,44 @@ export default class HomeTab extends Plugin {
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE)
 		this.activeEmbeddedHomeTabViews.forEach(view => view.unload())
 		this.bookmarkedFileManager.unload()
+		this.destroyTabsOverview()
+	}
+
+	private initTabsOverview(): void {
+		this.tabsOverviewManager = new TabsOverviewManager(this.app)
+		if(this.settings.swipeGestureEnabled){
+			this.swipeDetector = new SwipeDetector(
+				document.body,
+				() => this.tabsOverviewManager?.open()
+			)
+		}
+	}
+
+	private destroyTabsOverview(): void {
+		this.swipeDetector?.destroy()
+		this.swipeDetector = null
+		this.tabsOverviewManager?.destroy()
+		this.tabsOverviewManager = null
+	}
+
+	public toggleTabsOverview(enabled: boolean): void {
+		if(enabled){
+			this.initTabsOverview()
+		} else {
+			this.destroyTabsOverview()
+		}
+	}
+
+	public toggleSwipeGesture(enabled: boolean): void {
+		if(enabled && this.tabsOverviewManager){
+			this.swipeDetector = new SwipeDetector(
+				document.body,
+				() => this.tabsOverviewManager?.open()
+			)
+		} else {
+			this.swipeDetector?.destroy()
+			this.swipeDetector = null
+		}
 	}
 
 	async loadSettings(): Promise<void> {
