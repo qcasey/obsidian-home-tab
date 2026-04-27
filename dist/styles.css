@@ -101,16 +101,6 @@
 }
 
 /* Tabs overview */
-.tab-overview-swipe-zone{
-    position: fixed;
-    bottom: 48px;
-    left: 0;
-    right: 0;
-    height: 60px;
-    z-index: 100;
-    touch-action: none;
-}
-
 .tab-overview-container{
     position: fixed;
     inset: 0;
@@ -245,60 +235,4 @@
     overflow: hidden;
     text-overflow: ellipsis;
     display: block;
-}
-
-/* Toolbar pairs */
-.toolbar-pair-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1px;
-    z-index: 10;
-    touch-action: none;
-    border-radius: inherit;
-    overflow: hidden;
-}
-
-.toolbar-pair-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.toolbar-pair-icon svg {
-    width: 14px;
-    height: 14px;
-}
-
-.toolbar-pair-separator {
-    font-size: 10px;
-    color: var(--text-muted);
-    line-height: 1;
-    user-select: none;
-}
-
-.toolbar-pair-overlay::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 0%;
-    background: var(--interactive-accent);
-    opacity: 0.2;
-    border-radius: inherit;
-    pointer-events: none;
-}
-
-.toolbar-pair-pressing::after {
-    height: 100%;
-    transition: height var(--toolbar-pair-press-duration, 2000ms) linear;
-}
-
-.toolbar-pair-activated {
-    background: var(--interactive-accent);
-    opacity: 0.8;
-    transition: opacity 200ms ease-out;
 }

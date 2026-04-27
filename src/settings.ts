@@ -1,6 +1,5 @@
 import { App, Setting, PluginSettingTab, normalizePath, Platform } from 'obsidian'
 import type HomeTab from './main'
-import type { ToolbarPair } from './toolbar/toolbarPairTypes'
 import iconSuggester from './suggester/iconSuggester'
 import { lucideIcons, type LucideIcon } from './utils/lucideIcons'
 import ImageFileSuggester from './suggester/imageSuggester'
@@ -45,10 +44,7 @@ export interface HomeTabSettings extends ObjectKeys{
     newTabOnStart: boolean
     closePreviousSessionTabs: boolean
     enableTabsOverview: boolean
-    swipeGestureEnabled: boolean
-    enableToolbarPairs: boolean
-    toolbarPairs: ToolbarPair[]
-    defaultLongPressDuration: number
+
 }
 
 export const DEFAULT_SETTINGS: HomeTabSettings = {
@@ -72,10 +68,7 @@ export const DEFAULT_SETTINGS: HomeTabSettings = {
     newTabOnStart: false,
     closePreviousSessionTabs: false,
     enableTabsOverview: false,
-    swipeGestureEnabled: true,
-    enableToolbarPairs: false,
-    toolbarPairs: [],
-    defaultLongPressDuration: 2000,
+
 }
 
 
@@ -117,117 +110,18 @@ export class HomeTabSettingTab extends PluginSettingTab{
         }
 
         if(Platform.isMobile){
-            containerEl.createEl('h2', {text: 'Mobile tabs overview'});
+            containerEl.createEl('h2', {text: 'Mobile'});
             new Setting(containerEl)
-                .setName('Enable tabs overview')
-                .setDesc('Adds a Safari-like tabs overview with swipe-up gesture and zoom animation.')
+                .setName('Custom tabs overview')
+                .setDesc('Use a Safari-like tabs overview with zoom animation instead of Obsidian\'s built-in switcher.')
                 .addToggle(toggle => toggle
                     .setValue(this.plugin.settings.enableTabsOverview)
                     .onChange(value => {
                         this.plugin.settings.enableTabsOverview = value
                         this.plugin.saveSettings()
                         this.plugin.toggleTabsOverview(value)
-                        this.display()
                     }))
 
-            if(this.plugin.settings.enableTabsOverview){
-                new Setting(containerEl)
-                    .setName('Swipe-up gesture')
-                    .setDesc('Swipe up from the bottom of the screen to open the tabs overview.')
-                    .addToggle(toggle => toggle
-                        .setValue(this.plugin.settings.swipeGestureEnabled)
-                        .onChange(value => {
-                            this.plugin.settings.swipeGestureEnabled = value
-                            this.plugin.saveSettings()
-                            this.plugin.toggleSwipeGesture(value)
-                        }))
-            }
-
-            containerEl.createEl('h2', {text: 'Toolbar pairs'});
-            new Setting(containerEl)
-                .setName('Enable toolbar pairs')
-                .setDesc('Combine two toolbar actions into one button. Tap for primary, long-press for secondary.')
-                .addToggle(toggle => toggle
-                    .setValue(this.plugin.settings.enableToolbarPairs)
-                    .onChange(value => {
-                        this.plugin.settings.enableToolbarPairs = value
-                        this.plugin.saveSettings()
-                        this.plugin.toggleToolbarPairs(value)
-                        this.display()
-                    }))
-
-            if(this.plugin.settings.enableToolbarPairs){
-                new Setting(containerEl)
-                    .setName('Long-press duration')
-                    .setDesc('Default hold time in milliseconds to trigger the secondary action.')
-                    .addSlider(slider => slider
-                        .setLimits(500, 5000, 100)
-                        .setDynamicTooltip()
-                        .setValue(this.plugin.settings.defaultLongPressDuration)
-                        .onChange(value => {
-                            this.plugin.settings.defaultLongPressDuration = value
-                            this.plugin.saveSettings()
-                            this.plugin.updateToolbarPairs()
-                        }))
-
-                const allCommands = Object.values((this.app as any).commands.commands as Record<string, { id: string; name: string }>)
-                    .sort((a, b) => a.name.localeCompare(b.name))
-
-                for (const pair of this.plugin.settings.toolbarPairs) {
-                    const pairSetting = new Setting(containerEl)
-                        .setClass('toolbar-pair-setting')
-                        .addDropdown(dropdown => {
-                            dropdown.addOption('', 'Select primary...')
-                            allCommands.forEach(cmd => dropdown.addOption(cmd.id, cmd.name))
-                            dropdown.setValue(pair.primaryCommandId)
-                            dropdown.onChange(value => {
-                                pair.primaryCommandId = value
-                                this.plugin.saveSettings()
-                                this.plugin.updateToolbarPairs()
-                            })
-                        })
-                        .addDropdown(dropdown => {
-                            dropdown.addOption('', 'Select secondary...')
-                            allCommands.forEach(cmd => dropdown.addOption(cmd.id, cmd.name))
-                            dropdown.setValue(pair.secondaryCommandId)
-                            dropdown.onChange(value => {
-                                pair.secondaryCommandId = value
-                                this.plugin.saveSettings()
-                                this.plugin.updateToolbarPairs()
-                            })
-                        })
-                        .addToggle(toggle => toggle
-                            .setValue(pair.enabled)
-                            .onChange(value => {
-                                pair.enabled = value
-                                this.plugin.saveSettings()
-                                this.plugin.updateToolbarPairs()
-                            }))
-                        .addExtraButton(button => button
-                            .setIcon('trash')
-                            .setTooltip('Remove pair')
-                            .onClick(() => {
-                                this.plugin.settings.toolbarPairs = this.plugin.settings.toolbarPairs.filter(p => p.id !== pair.id)
-                                this.plugin.saveSettings()
-                                this.plugin.updateToolbarPairs()
-                                this.display()
-                            }))
-                }
-
-                new Setting(containerEl)
-                    .addButton(button => button
-                        .setButtonText('Add pair')
-                        .onClick(() => {
-                            this.plugin.settings.toolbarPairs.push({
-                                id: Date.now().toString(),
-                                primaryCommandId: '',
-                                secondaryCommandId: '',
-                                enabled: true,
-                            })
-                            this.plugin.saveSettings()
-                            this.display()
-                        }))
-            }
         }
 
         containerEl.createEl('h2', {text: 'Files display'});

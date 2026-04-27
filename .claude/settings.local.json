@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -l \"quickSwitcher\\\\|quick-switcher\" /Users/casey/Codes/JavaScript/obsidian-home-tab/src/**/*.ts)",
+      "Bash(find /Users/casey/Codes/JavaScript/obsidian-home-tab/node_modules -name *recent* -type f)",
+      "Bash(git -C /Users/casey/Codes/JavaScript/obsidian-home-tab tag --sort=-v:refname)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:forum.obsidian.md)",
+      "Bash(git commit:*)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(gh api:*)"
+    ]
+  }
+}

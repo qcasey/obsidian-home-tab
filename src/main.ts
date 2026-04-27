@@ -15,9 +15,9 @@ import { EmbeddedHomeTab, HomeTabView, VIEW_TYPE } from 'src/homeView';
 import { HomeTabSettingTab, DEFAULT_SETTINGS, type HomeTabSettings } from './settings'
 import { pluginSettingsStore, bookmarkedFiles } from './store'
 import { bookmarkedFilesManager } from './bookmarkedFiles';
-import { SwipeDetector } from './gestures/swipeDetector';
+
 import { TabsOverviewManager } from './tabsOverviewManager';
-import { ToolbarPairManager } from './toolbar/toolbarPairManager';
+
 
 declare module 'obsidian'{
 	interface App{
@@ -74,9 +74,8 @@ export default class HomeTab extends Plugin {
 	settings: HomeTabSettings;
 	bookmarkedFileManager: bookmarkedFilesManager
 	activeEmbeddedHomeTabViews: EmbeddedHomeTab[]
-	private swipeDetector: SwipeDetector | null = null
 	private tabsOverviewManager: TabsOverviewManager | null = null
-	private toolbarPairManager: ToolbarPairManager | null = null
+
 	
 	async onload() {
 		console.log('Loading home-tab plugin')
@@ -111,7 +110,7 @@ export default class HomeTab extends Plugin {
 					if(this.settings.enableTabsOverview && this.tabsOverviewManager){
 						this.tabsOverviewManager.toggle()
 					} else {
-						new Notice('Enable "Tabs overview" in Home tab settings first.')
+						new Notice('Enable "Custom tabs overview" in Home tab settings first.')
 					}
 				}
 			})
@@ -138,10 +137,6 @@ export default class HomeTab extends Plugin {
 				this.initTabsOverview()
 			}
 
-			// Initialize toolbar pairs on mobile if enabled
-			if(Platform.isMobile && this.settings.enableToolbarPairs){
-				this.initToolbarPairs()
-			}
 
 			if(this.settings.newTabOnStart){
 				// If an Home tab leaf is already open focus it
@@ -178,22 +173,13 @@ export default class HomeTab extends Plugin {
 		this.activeEmbeddedHomeTabViews.forEach(view => view.unload())
 		this.bookmarkedFileManager.unload()
 		this.destroyTabsOverview()
-		this.destroyToolbarPairs()
 	}
 
 	private initTabsOverview(): void {
 		this.tabsOverviewManager = new TabsOverviewManager(this.app)
-		if(this.settings.swipeGestureEnabled){
-			this.swipeDetector = new SwipeDetector(
-				document.body,
-				() => this.tabsOverviewManager?.open()
-			)
-		}
 	}
 
 	private destroyTabsOverview(): void {
-		this.swipeDetector?.destroy()
-		this.swipeDetector = null
 		this.tabsOverviewManager?.destroy()
 		this.tabsOverviewManager = null
 	}
@@ -203,49 +189,6 @@ export default class HomeTab extends Plugin {
 			this.initTabsOverview()
 		} else {
 			this.destroyTabsOverview()
-		}
-	}
-
-	private initToolbarPairs(): void {
-		this.toolbarPairManager = new ToolbarPairManager(
-			this.app,
-			this.settings.toolbarPairs,
-			this.settings.defaultLongPressDuration
-		)
-		this.toolbarPairManager.init()
-	}
-
-	private destroyToolbarPairs(): void {
-		this.toolbarPairManager?.destroy()
-		this.toolbarPairManager = null
-	}
-
-	public toggleToolbarPairs(enabled: boolean): void {
-		if(enabled){
-			this.initToolbarPairs()
-		} else {
-			this.destroyToolbarPairs()
-		}
-	}
-
-	public updateToolbarPairs(): void {
-		if(this.toolbarPairManager){
-			this.toolbarPairManager.updatePairs(
-				this.settings.toolbarPairs,
-				this.settings.defaultLongPressDuration
-			)
-		}
-	}
-
-	public toggleSwipeGesture(enabled: boolean): void {
-		if(enabled && this.tabsOverviewManager){
-			this.swipeDetector = new SwipeDetector(
-				document.body,
-				() => this.tabsOverviewManager?.open()
-			)
-		} else {
-			this.swipeDetector?.destroy()
-			this.swipeDetector = null
 		}
 	}
 
